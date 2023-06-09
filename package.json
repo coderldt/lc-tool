@@ -1,0 +1,31 @@
+{
+  "name": "lc-tools",
+  "version": "1.0.0",
+  "description": "lc tools",
+  "main": "index.js",
+  "type": "module",
+  "bin": {
+    "lc-tool": "./scripts/index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/coderldt/lc-tool.git"
+  },
+  "publishConfig": {
+    "registry": "https://packages.aliyun.com/62ecc7d881ddd27ad912a7f4/npm/npm-registry/"
+  },
+  "keywords": [
+    "tools",
+    "coderldt"
+  ],
+  "author": "coderldt",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^10.0.1",
+    "execa": "1.0.0",
+    "iconv-lite": "^0.6.3"
+  }
+}
