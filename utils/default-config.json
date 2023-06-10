@@ -1,0 +1,22 @@
+[
+  {
+    "key": "npm",
+    "value": "https://registry.npmjs.org/"
+  },
+  {
+    "key": "yarn",
+    "value": "https://registry.yarnpkg.com/"
+  },
+  {
+    "key": "cnpm",
+    "value": "http://r.cnpmjs.org/"
+  },
+  {
+    "key": "taobao",
+    "value": "https://registry.npm.taobao.org"
+  },
+  {
+    "key": "npmMirror",
+    "value": "https://skimdb.npmjs.com/registry/"
+  }
+]
