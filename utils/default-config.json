@@ -1,22 +1,32 @@
 [
   {
     "key": "npm",
-    "value": "https://registry.npmjs.org/"
+    "value": {
+      "registry": "https://registry.npmjs.org/"
+    }
   },
   {
     "key": "yarn",
-    "value": "https://registry.yarnpkg.com/"
+    "value": {
+      "registry": "https://registry.yarnpkg.com/"
+    }
   },
   {
     "key": "cnpm",
-    "value": "http://r.cnpmjs.org/"
+    "value": {
+      "registry": "http://r.cnpmjs.org/"
+    }
   },
   {
     "key": "taobao",
-    "value": "https://registry.npm.taobao.org"
+    "value": {
+      "registry": "https://registry.npm.taobao.org/"
+    }
   },
   {
     "key": "npmMirror",
-    "value": "https://skimdb.npmjs.com/registry/"
+    "value": {
+      "registry": "https://skimdb.npmjs.com/registry/"
+    }
   }
 ]

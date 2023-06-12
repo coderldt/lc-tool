@@ -9,12 +9,14 @@ const inquirer = require('inquirer')
 const packageJson = require('../package.json')
 const {
   defaultConfigPath,
-  isExist,
-  createDir,
   homeDir,
   configFileName,
-  getConfigFile,
   WHITELIST_PACKAGE_NAME,
+  WHITELIST_RESET_LIST,
+  isExist,
+  createDir,
+  writeFile,
+  getConfigFile,
   setRegistry
 } = require('../utils')
 
@@ -65,7 +67,7 @@ program.command('list')
 
     data.forEach((config) => {
       const { key, value } = config
-      configContent.push(`${key.padEnd(keyMaxLength + 2, ' ')} --->   ${value}`)
+      configContent.push(`${key.padEnd(keyMaxLength + 2, ' ')} --->   ${value.registry}`)
     })
 
     console.log(configContent.join('\n'))
@@ -101,22 +103,19 @@ program.command('reset')
   .description('重置源')
   .argument('<target>', '设置源目标')
   .action(async (target) => {
-    if (!WHITELIST_PACKAGE_NAME.includes(target)) {
-      return console.log(`重置源目标暂不支持设置 ${target}, 只支持 ${WHITELIST_PACKAGE_NAME.join(',')}`)
+    if (!WHITELIST_RESET_LIST.includes(target)) {
+      return console.log(`重置源目标暂不支持设置 ${target}, 只支持 ${WHITELIST_RESET_LIST.join(',')}`)
     }
 
     if (!isExist(defaultConfigPath)) {
       return console.log('找不到配置信息，请先进行初始化 init')
     }
 
-    const { status, data } = await getConfigFile(defaultConfigPath)
-    if (!status) {
-      return console.log('找不到配置信息，请先进行初始化 init')
-    }
+    const fileContent = fs.readFileSync(path.join(__dirname, '../utils/default-config.json'), 'utf-8')
 
-    const targetDetail = data.filter(s => s.key === target)[0]
+    const targetDetail = JSON.parse(fileContent).filter(s => s.key === target)[0]
     if (!targetDetail) {
-      return console.log(`未找到源信息：${source}`)
+      return console.log(`未找到初始源信息：${source}`)
     }
 
     await setRegistry(target, targetDetail.value)
@@ -125,26 +124,50 @@ program.command('reset')
 program.command('add')
   .description('添加源')
   .argument('<target>', '设置源目标')
-  .action(async (target) => {
-    if (!WHITELIST_PACKAGE_NAME.includes(target)) {
-      return console.log(`重置源目标暂不支持设置 ${target}, 只支持 ${WHITELIST_PACKAGE_NAME.join(',')}`)
+  .option('-r, --registry <registry>', '源地址')
+  .option('-aa, --alwaysAuth [alwaysAuth]', '用户验证', false)
+  .action(async (target, options) => {
+    const { registry, alwaysAuth } = options
+    if (!Object.keys(options).length) {
+      return console.log('请通过查看 help add 命令参数')
     }
 
     if (!isExist(defaultConfigPath)) {
       return console.log('找不到配置信息，请先进行初始化 init')
     }
 
-    const { status, data } = await getConfigFile(defaultConfigPath)
+    let { status, data } = await getConfigFile(defaultConfigPath)
     if (!status) {
       return console.log('找不到配置信息，请先进行初始化 init')
     }
 
     const targetDetail = data.filter(s => s.key === target)[0]
-    if (!targetDetail) {
-      return console.log(`未找到源信息：${source}`)
+    if (targetDetail) {
+      const { ok } = await inquirer.prompt([
+        {
+          name: 'ok',
+          type: 'confirm',
+          message: `该源已存在，是否覆盖？`,
+          default: false
+        }
+      ])
+
+      if (ok) {
+        data = data.filter(s => s.key !== target)
+      }
     }
 
-    await setRegistry(target, targetDetail.value)
+    const config = {
+      key: target,
+      value: {
+        registry,
+        'always-auth': alwaysAuth || false
+      }
+    }
+
+    const newConfigList = [...data, config]
+
+    writeFile({ path: defaultConfigPath, fileContent: JSON.stringify(newConfigList, null, 2) })
   })
 
 // const encoding = 'cp936'

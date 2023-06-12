@@ -3,35 +3,44 @@ const path = require('path')
 const execa = require('execa')
 const osHomedir = require('os-homedir')
 
-const homeDir = osHomedir();
+const homeDir = osHomedir()
 const configFileName = 'c-tools.json'
 
 const defaultConfigPath = path.join(homeDir, configFileName)
 
+// 设置源白名单
 const WHITELIST_PACKAGE_NAME = ['npm', 'yarn', 'pnpm']
+// 重置源白名单
+const WHITELIST_RESET_LIST = ['npm', 'yarn', 'cnpm', 'taobao', 'npmMirror']
 
-function isExist(path) {
-  return fs.existsSync(path);
+function isExist (path) {
+  return fs.existsSync(path)
 }
 
-async function createDir({ dir, fileName, fileContent }) {
+async function writeFile ({ path, fileContent }) {
+  const fileRes = fs.writeFileSync(path, fileContent, 'utf-8')
+  if (fileRes) {
+    console.error('无法创建文件:', fileName)
+    return
+  }
+}
+
+async function createDir ({ dir, fileName, fileContent }) {
   const dirRes = await fs.mkdirSync(dir, { recursive: true })
   if (dirRes) {
-    console.error('无法创建目录:', dir);
-    return;
+    console.error('无法创建目录:', dir)
+    return
   }
 
 
   const fileRes = await fs.writeFileSync(path.join(dir, fileName), fileContent)
   if (fileRes) {
-    console.error('无法创建文件:', fileName);
-    return;
+    console.error('无法创建文件:', fileName)
+    return
   }
-
-  console.log('文件已创建');
 }
 
-async function getConfigFile(configPath) {
+async function getConfigFile (configPath) {
   const content = fs.readFileSync(configPath, 'utf-8')
 
   if (content) {
@@ -41,17 +50,17 @@ async function getConfigFile(configPath) {
   return { status: false, data: JSON.parse(content) }
 }
 
-async function setRegistry(target, source) {
+async function setRegistry (target, source) {
   try {
-    switch(target) {
+    switch (target) {
       case WHITELIST_PACKAGE_NAME[0]:
-        execa('npm', ['config', 'set', 'registry', source])
-        break
       case WHITELIST_PACKAGE_NAME[1]:
-        execa('yarn', ['config', 'set', 'registry', source])
-        break
       case WHITELIST_PACKAGE_NAME[2]:
-        execa('pnpm', ['config', 'set', 'registry', source])
+        Object.entries(source).forEach(([key, value]) => {
+          console.log(`${target} config set ${key} ${value}`)
+
+          execa(target, ['config', 'set', key, value])
+        })
         break
     }
   } catch (error) {
@@ -64,8 +73,10 @@ module.exports = {
   configFileName,
   defaultConfigPath,
   WHITELIST_PACKAGE_NAME,
+  WHITELIST_RESET_LIST,
   isExist,
   createDir,
   getConfigFile,
   setRegistry,
+  writeFile,
 }
